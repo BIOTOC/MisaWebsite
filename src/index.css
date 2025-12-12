@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Chrome, Edge, Opera */
+input::-webkit-password-toggle-button {
+  display: none;
+}
+
+/* Internet Explorer */
+input::-ms-reveal {
+  display: none;
+}
+
+/* Firefox (nếu xuất hiện) */
+input::-moz-password-toggle-button {
+  display: none;
+}
