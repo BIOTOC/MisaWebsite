@@ -44,15 +44,17 @@ export default function Login() {
             {/* LEFT FORM */}
             <div className="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-32 py-10">
                 <h1 className="text-3xl font-semibold text-center mb-2">Đăng nhập</h1>
-                <p className="text-center text-gray-500 mb-10">
+                <p className="text-center text-gray-500 mb-5">
                     Hệ thống quản lý tập trung của hệ sinh thái BSH
                 </p>
 
                 {/* Error message */}
                 {error && (
-                    <p className="text-red-500 text-sm mt-1">
-                        {error}
-                    </p>
+                    <div className="w-full flex justify-center mb-2">
+                        <p className="text-red-500 text-sm mt-1 text-center">
+                            {error}
+                        </p>
+                    </div>
                 )}
 
                 <div className="flex flex-col gap-4">
