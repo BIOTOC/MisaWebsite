@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getHistoryData } from "../services/insuranceDetailService";
 import { getSearchBoxData } from "../services/insuranceService";
+import Breadcrumb from "../components/Breadcrumb";
 
 export default function CarInspectionHistoryPage() {
   const navigate = useNavigate();
@@ -68,70 +69,75 @@ export default function CarInspectionHistoryPage() {
   };
 
   return (
-    <div className="p-6">
-      {/* TITLE */}
-      <h1 className="text-brand-orange text-xl font-bold mb-4">
-        Lịch sử thẩm định
-      </h1>
+    <div>
+      {/* Breadcrumb */}
+      <Breadcrumb items={["Thẩm định dịch vụ", "Vật chất xe ô tô", "Chi tiết thẩm định dịch vụ", "Lịch sử thẩm định"]} />
 
-      {/* TABLE */}
-      <div className="overflow-x-auto overflow-y-auto max-h-[59vh] border border-gray-500">
-        <table className="w-full border-collapse text-sm">
+      <div className="px-6 pb-6 pt-0">
+        {/* TITLE */}
+        <h1 className="text-brand-orange text-xl font-bold mb-4">
+          Lịch sử thẩm định
+        </h1>
 
-          {/* HEADER */}
-          <thead className="sticky top-0 z-10">
-            <tr className="bg-gray-200 text-gray-700">
-              <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[160px]">
-                Ngày xử lý
-              </th>
-              <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[130px]">
-                Người xử lý
-              </th>
-              <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[160px]">
-                Email xử lý
-              </th>
-              <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[150px]">
-                Tên khách hàng
-              </th>
-              <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[110px]">
-                Biển số xe
-              </th>
-              <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[150px]">
-                Kết quả thẩm định
-              </th>
-              <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[220px]">
-                Mô tả chi tiết
-              </th>
-            </tr>
-          </thead>
+        {/* TABLE */}
+        <div className="overflow-x-auto overflow-y-auto max-h-[56vh] border border-gray-500">
+          <table className="w-full border-collapse text-sm">
 
-          {/* BODY */}
-          <tbody>
-            {detail.map((row, index) => (
-              <tr
-                key={index}
-                className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"} hover:bg-gray-50`}
-              >
-                <td className="border border-gray-500 px-2 py-1">{row.date}</td>
-                <td className="border border-gray-500 px-2 py-1">{row.user}</td>
-                <td className="border border-gray-500 px-2 py-1">{row.email}</td>
-                <td className="border border-gray-500 px-2 py-1">{row.customer}</td>
-                <td className="border border-gray-500 px-2 py-1">{row.plate}</td>
-                <td className="border border-gray-500 px-2 py-1">{uwStatus.find(s => s.Code === row.result)?.Name || row.result}</td>
-                <td className="border border-gray-500 px-2 py-1">{row.description}</td>
+            {/* HEADER */}
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-gray-200 text-gray-700">
+                <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[160px]">
+                  Ngày xử lý
+                </th>
+                <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[130px]">
+                  Người xử lý
+                </th>
+                <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[160px]">
+                  Email xử lý
+                </th>
+                <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[150px]">
+                  Tên khách hàng
+                </th>
+                <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[110px]">
+                  Biển số xe
+                </th>
+                <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[150px]">
+                  Kết quả thẩm định
+                </th>
+                <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[220px]">
+                  Mô tả chi tiết
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
 
-      <div className="mt-4 flex justify-center">
-        <button
-          onClick={handleBack}
-          className="w-full md:w-auto px-6 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white rounded"
-        >
-          Quay lại
-        </button>
+            {/* BODY */}
+            <tbody>
+              {detail.map((row, index) => (
+                <tr
+                  key={index}
+                  className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"} hover:bg-gray-50`}
+                >
+                  <td className="border border-gray-500 px-2 py-1">{row.date}</td>
+                  <td className="border border-gray-500 px-2 py-1">{row.user}</td>
+                  <td className="border border-gray-500 px-2 py-1">{row.email}</td>
+                  <td className="border border-gray-500 px-2 py-1">{row.customer}</td>
+                  <td className="border border-gray-500 px-2 py-1">{row.plate}</td>
+                  <td className="border border-gray-500 px-2 py-1">{uwStatus.find(s => s.Code === row.result)?.Name || row.result}</td>
+                  <td className="border border-gray-500 px-2 py-1">{row.description}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-4 flex justify-center">
+          <button
+            onClick={handleBack}
+            className="w-full md:w-auto px-6 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white rounded"
+          >
+            Quay lại
+          </button>
+        </div>
       </div>
     </div>
   );

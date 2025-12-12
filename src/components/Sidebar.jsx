@@ -40,7 +40,7 @@ export default function Sidebar({ menuOpen, setMenuOpen }) {
             className="w-full text-left px-2 py-2 rounded hover:bg-gray-200 
                        flex justify-between items-center"
           >
-            <span>Thẩm định dịch vụ</span>
+            <span className="font-semibold">Thẩm định dịch vụ</span>
             <span>{submenuOpen ? "▲" : "▼"}</span>
           </button>
 

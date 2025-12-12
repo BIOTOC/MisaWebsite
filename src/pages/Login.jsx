@@ -48,8 +48,15 @@ export default function Login() {
                     Hệ thống quản lý tập trung của hệ sinh thái BSH
                 </p>
 
+                {/* Error message */}
+                {error && (
+                    <p className="text-red-500 text-sm mt-1">
+                        {error}
+                    </p>
+                )}
+
                 <div className="flex flex-col gap-4">
-                     {/* Mã đơn vị */}
+                    {/* Mã đơn vị */}
                     <div>
                         <label className="block text-sm font-medium mb-1">Mã đơn vị</label>
                         <input
@@ -91,17 +98,10 @@ export default function Login() {
                                 onClick={toggleShowPassword}
                                 className="absolute right-3 h-full flex items-center justify-center text-gray-600 hover:text-gray-800"
                             >
-                                {showPassword ? <EyeClosed size={20} /> : <Eye size={20} />}
+                                {showPassword ? <Eye size={20} /> : <EyeClosed size={20} />}
                             </button>
                         </div>
                     </div>
-
-                    {/* Error message */}
-                    {error && (
-                        <p className="text-red-500 text-sm mt-1">
-                            {error}
-                        </p>
-                    )}
 
                     {/* Remember checkbox */}
                     {/* <label className="flex items-center gap-2 text-sm mt-1">

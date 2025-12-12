@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
 import SearchBox from "../components/Searchbox";
+import Breadcrumb from "../components/Breadcrumb";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react"
 import { getInsuranceOrders } from "../services/insuranceService"
@@ -220,11 +221,7 @@ export default function CarMaterial() {
     return (
         <div>
             {/* Breadcrumb */}
-            <div className="text-base font-semibold mb-4 flex items-center gap-2">
-                <span>Thẩm định dịch vụ</span>
-                <span className="text-gray-400">›</span>
-                <span className="text-brand-orange">{pageName}</span>
-            </div>
+            <Breadcrumb items={["Thẩm định dịch vụ", pageName]} />
 
             {/* Search Box */}
             <SearchBox
