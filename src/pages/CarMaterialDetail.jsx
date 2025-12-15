@@ -78,9 +78,6 @@ export default function CarMaterialDetail() {
 
     return (
         <div>
-            {/* Breadcrumb */}
-            <Breadcrumb items={["Thẩm định dịch vụ", "Vật chất xe ô tô", "Chi tiết thẩm định dịch vụ"]} />
-
             <div className="px-4 pb-4 pt-0 text-xs">
                 {/* Thông tin chung */}
                 <div className="mb-2 text-xs">
@@ -126,7 +123,9 @@ export default function CarMaterialDetail() {
                                 <tr
                                     key={i}
                                     onClick={() => setSelectedVehicle(v)}
-                                    className="[&>td]:border [&>td]:px-2 [&>td]:py-1 text-left cursor-pointer hover:bg-gray-50"
+                                    className={`[&>td]:border [&>td]:px-2 [&>td]:py-1 text-left cursor-pointer hover:bg-gray-50
+                                        ${selectedVehicle?.iddt === v.iddt ? "bg-orange-100" : ""}
+                                    `}
                                 >
                                     <td>{(currentPage - 1) * itemsPerPage + i + 1}</td>
                                     <td>{v.owner}</td>
@@ -261,7 +260,7 @@ export default function CarMaterialDetail() {
                                             <img
                                                 src={img.link}
                                                 alt={img.name || `img-${idx}`}
-                                                className="w-full h-20 object-cover"
+                                                className="w-full aspect-[4/3] object-cover"
                                             />
                                         </div>
                                     ))}
@@ -300,8 +299,7 @@ export default function CarMaterialDetail() {
                                 state={{
                                     from: "detail",
                                     id,
-                                    iddt: 1
-                                    // iddt : selectedVehicle.iddt
+                                    iddt : selectedVehicle.iddt
                                 }}
                                 className="text-blue-600 underline">
                                 Lịch sử thẩm định
@@ -323,7 +321,7 @@ export default function CarMaterialDetail() {
                 {previewImage && (
                     <div
                         className="fixed inset-0 bg-black/70 flex flex-col items-center justify-center 
-        z-50 p-4 top-[60px] left-0 lg:left-[240px]"
+                            z-50 p-4 top-[60px] left-0 lg:left-[240px]"
                         onClick={() => setPreviewImage(null)}
                     >
                         {/* Nút đóng */}
@@ -334,8 +332,8 @@ export default function CarMaterialDetail() {
                                 setPreviewIndex(null);
                             }}
                             className="absolute top-4 right-4 bg-black/60 text-white w-10 h-10 
-            rounded-full flex items-center justify-center text-xl font-bold 
-            hover:bg-black/80 transition z-50"
+                                rounded-full flex items-center justify-center text-xl font-bold 
+                              hover:bg-black/80 transition z-50"
                         >
                             ×
                         </button>
@@ -349,7 +347,8 @@ export default function CarMaterialDetail() {
 
                         {/* Thumbnails */}
                         <div
-                            className="flex gap-2 p-2 bg-black/40 rounded-lg"
+                            className="flex gap-2 p-2 bg-black/40 rounded-lg 
+                                overflow-x-auto whitespace-nowrap scrollbar-thin"
                             onClick={(e) => e.stopPropagation()}
                         >
                             {images.slice(0, 5).map((img, idx) => (
@@ -357,7 +356,7 @@ export default function CarMaterialDetail() {
                                     key={idx}
                                     src={img.link}
                                     className={`w-16 h-16 object-cover cursor-pointer rounded border 
-                    ${idx === previewIndex ? "border-orange-400" : "border-transparent"}`}
+                                        ${idx === previewIndex ? "border-orange-400" : "border-transparent"}`}
                                     onClick={() => {
                                         setPreviewIndex(idx);
                                         setPreviewImage(`${img.link}?t=${new Date().getTime()}`);

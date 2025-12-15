@@ -1,6 +1,6 @@
 export default function Breadcrumb({ items }) {
     return (
-        <div className="text-base font-semibold mb-4 flex items-center gap-2">
+        <div className="text-base font-semibold flex items-center gap-2">
             {items.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
                     <span className={index === items.length - 1 ? "text-brand-orange" : ""}>

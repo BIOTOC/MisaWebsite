@@ -22,6 +22,8 @@ export default function CarMaterialDetail() {
     const [insurStatus, setInsurStatus] = useState([]);
     const images = selectedVehicle?.appraisalFiles?.images || [];
     const [previewIndex, setPreviewIndex] = useState(null);
+    const [descError, setDescError] = useState(false);
+    const [vehicleEdits, setVehicleEdits] = useState({});
 
     useEffect(() => {
         const fetchDropdown = async () => {
@@ -108,6 +110,7 @@ export default function CarMaterialDetail() {
 
             if (res?.Status === "OK") {
                 showToast("success", message);
+                navigate(`/car-material/${detail.id}`);
             } else {
                 showToast("error", message);
             }
@@ -119,31 +122,73 @@ export default function CarMaterialDetail() {
 
     const handleSelectVehicle = (vehicle) => {
         setSelectedVehicle(vehicle);
-        setDescription(vehicle.appraisalNote || "");
 
-        const selectedOption = uwStatus.find(opt => opt.Code === vehicle.result);
+        const saved = vehicleEdits[vehicle.iddt];
+
+        if (!saved) {
+            setVehicleEdits(prev => ({
+                ...prev,
+                [vehicle.iddt]: {
+                    id_dt: vehicle.iddt,
+                    result: vehicle.result,
+                    description: vehicle.appraisalNote ?? ""
+                }
+            }));
+        }
+
+        setDescription(saved?.description ?? vehicle.appraisalNote ?? "");
+
+        const selectedOption = uwStatus.find(
+            opt => opt.Code === (saved?.result ?? vehicle.result)
+        );
         setSelectedResult(selectedOption || null);
     };
 
     const handleSave = async () => {
+        const uwList = Object.values(vehicleEdits);
+
+        if (uwList.length === 0) {
+            showToast("error", "Bạn chưa thay đổi thông tin thẩm định của xe nào!");
+            return;
+        }
+
+        // Kiểm tra ô mô tả có bị bỏ trống không
+        const invalid = uwList.some(x => !x.description?.trim());
+        if (invalid) {
+            setDescError(true);
+            showToast("error", "Vui lòng nhập mô tả chi tiết cho tất cả các xe đã chỉnh sửa!");
+            return;
+        }
+
+        const payload = {
+            unit: "000",
+            id: detail.id,
+            reviewerCode: "PTDT",
+            orderStatus: detail.orderStatus,
+            handlingStatus: detail.handlingStatus,
+            uwList
+        };
+
+        console.log(payload);
+
         try {
-            const res = await createVehicleUW(
-                detail.id,
-                detail.orderStatus,
-                detail.handlingStatus,
-                selectedVehicle?.iddt,
-                selectedResult?.Code,
-                description
-            );
+            const res = await createVehicleUW(payload);
 
             const message = res?.Message?.trim() ||
                 (res?.Status === "OK" ? "Lưu thành công!" : "Có lỗi xảy ra!");
 
             if (res?.Status === "OK") {
                 showToast("success", message);
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 800);
+
             } else {
                 showToast("error", message);
             }
+
+
         } catch {
             showToast("error", "Không thể kết nối server!");
         }
@@ -151,9 +196,6 @@ export default function CarMaterialDetail() {
 
     return (
         <div>
-            {/* Breadcrumb */}
-            <Breadcrumb items={["Thẩm định dịch vụ", "Vật chất xe ô tô", "Chi tiết thẩm định dịch vụ"]} />
-
             <div className="px-4 pb-4 pt-0 text-xs">
                 {/* Thông tin chung */}
                 <div className="mb-2 text-xs">
@@ -199,7 +241,9 @@ export default function CarMaterialDetail() {
                                 <tr
                                     key={i}
                                     onClick={() => handleSelectVehicle(v)}
-                                    className="[&>td]:border [&>td]:px-2 [&>td]:py-1 text-left cursor-pointer hover:bg-gray-50"
+                                    className={`[&>td]:border [&>td]:px-2 [&>td]:py-1 text-left cursor-pointer hover:bg-orange-100
+                                        ${selectedVehicle?.iddt === v.iddt ? "bg-orange-100" : ""}
+                                    `}
                                 >
                                     <td>{(currentPage - 1) * itemsPerPage + i + 1}</td>
                                     <td>{v.owner}</td>
@@ -334,7 +378,7 @@ export default function CarMaterialDetail() {
                                             <img
                                                 src={img.link}
                                                 alt={img.name || `img-${idx}`}
-                                                className="w-full h-20 object-cover"
+                                                className="w-full aspect-[4/3] object-cover"
                                             />
                                         </div>
                                     ))}
@@ -366,7 +410,23 @@ export default function CarMaterialDetail() {
                                 {/* Dropdown kết quả */}
                                 <div className="flex flex-col">
                                     <label className="mb-1">Kết quả thẩm định</label>
-                                    <Listbox value={selectedResult} onChange={setSelectedResult}>
+                                    <Listbox value={selectedResult}
+                                        onChange={(option) => {
+                                            setSelectedResult(option);
+
+                                            if (selectedVehicle) {
+                                                setVehicleEdits(prev => ({
+                                                    ...prev,
+                                                    [selectedVehicle.iddt]: {
+                                                        ...prev[selectedVehicle.iddt],
+                                                        id_dt: selectedVehicle.iddt,
+                                                        description,
+                                                        result: option.Code
+                                                    }
+                                                }));
+                                            }
+                                        }}
+                                    >
                                         <div className="relative w-full">
                                             <ListboxButton className="border rounded px-2 py-[3px] w-full text-left flex justify-between items-center">
                                                 <span className="truncate">{selectedResult?.Name || "Chọn kết quả"}</span>
@@ -395,11 +455,34 @@ export default function CarMaterialDetail() {
                                 <div className="flex flex-col md:col-span-2">
                                     <label className="mb-1">Mô tả chi tiết</label>
                                     <textarea
-                                        className="border rounded px-2 py-1 w-full h-20"
+                                        className={`border rounded px-2 py-1 w-full h-20 transition-all 
+                                            ${descError ? "border-red-500 animate-shake" : ""}
+                                        `}
                                         placeholder="Nhập mô tả chi tiết..."
                                         value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
+                                        onChange={(e) => {
+                                            const newVal = e.target.value;
+                                            setDescription(newVal);
+                                            if (newVal.trim() !== "") setDescError(false);
+
+                                            if (selectedVehicle) {
+                                                setVehicleEdits(prev => ({
+                                                    ...prev,
+                                                    [selectedVehicle.iddt]: {
+                                                        ...prev[selectedVehicle.iddt],
+                                                        id_dt: selectedVehicle.iddt,
+                                                        description: newVal,
+                                                        result: selectedResult?.Code
+                                                    }
+                                                }));
+                                            }
+                                        }}
                                     />
+                                    {descError && (
+                                        <p className="text-red-500 text-[11px] mt-1">
+                                            Vui lòng nhập mô tả chi tiết trước khi lưu.
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -410,8 +493,7 @@ export default function CarMaterialDetail() {
                                 state={{
                                     from: "edit",
                                     id,
-                                    iddt: 1
-                                    // iddt: selectedVehicle.iddt
+                                    iddt: selectedVehicle.iddt
                                 }}
                                 className="text-blue-600 underline"
                             >
@@ -460,7 +542,7 @@ export default function CarMaterialDetail() {
                 {previewImage && (
                     <div
                         className="fixed inset-0 bg-black/70 flex flex-col items-center justify-center 
-        z-50 p-4 top-[60px] left-0 lg:left-[240px]"
+                            z-50 p-4 top-[60px] left-0 lg:left-[240px]"
                         onClick={() => setPreviewImage(null)}
                     >
                         {/* Nút đóng */}
@@ -471,8 +553,8 @@ export default function CarMaterialDetail() {
                                 setPreviewIndex(null);
                             }}
                             className="absolute top-4 right-4 bg-black/60 text-white w-10 h-10 
-            rounded-full flex items-center justify-center text-xl font-bold 
-            hover:bg-black/80 transition z-50"
+                                rounded-full flex items-center justify-center text-xl font-bold 
+                              hover:bg-black/80 transition z-50"
                         >
                             ×
                         </button>
@@ -486,7 +568,8 @@ export default function CarMaterialDetail() {
 
                         {/* Thumbnails */}
                         <div
-                            className="flex gap-2 p-2 bg-black/40 rounded-lg"
+                            className="flex gap-2 p-2 bg-black/40 rounded-lg 
+                                overflow-x-auto whitespace-nowrap scrollbar-thin"
                             onClick={(e) => e.stopPropagation()}
                         >
                             {images.slice(0, 5).map((img, idx) => (
@@ -494,7 +577,7 @@ export default function CarMaterialDetail() {
                                     key={idx}
                                     src={img.link}
                                     className={`w-16 h-16 object-cover cursor-pointer rounded border 
-                    ${idx === previewIndex ? "border-orange-400" : "border-transparent"}`}
+                                        ${idx === previewIndex ? "border-orange-400" : "border-transparent"}`}
                                     onClick={() => {
                                         setPreviewIndex(idx);
                                         setPreviewImage(`${img.link}?t=${new Date().getTime()}`);

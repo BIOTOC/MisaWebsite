@@ -1,4 +1,3 @@
-import { useLocation } from "react-router-dom";
 import SearchBox from "../components/Searchbox";
 import Breadcrumb from "../components/Breadcrumb";
 import { useNavigate } from "react-router-dom";
@@ -30,12 +29,7 @@ const TableSkeleton = () => {
 };
 
 export default function CarMaterial() {
-    const location = useLocation();
     const navigate = useNavigate();
-
-    const pageName = location.pathname.startsWith("/car-material")
-        ? "Vật chất xe ô tô"
-        : "Không xác định";
 
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
@@ -112,9 +106,25 @@ export default function CarMaterial() {
         }
     };
 
+    const statusMaps = {
+        orderStatus: dropdownData.insurStatus.reduce((acc, x) => {
+            acc[x.Name] = x.Code;
+            return acc;
+        }, {}),
+        handlingStatus: dropdownData.reStatus.reduce((acc, x) => {
+            acc[x.Name] = x.Code;
+            return acc;
+        }, {})
+    };
+
+
     const handleRowClick = (item) => {
-        const isCompleted = (item.orderStatus === "Đã ký" || item.orderStatus === "Đang trình") &&
-            item.handlingStatus === "Đã xử lý";
+        const orderCode = statusMaps.orderStatus[item.orderStatus];
+        const handlingCode = statusMaps.handlingStatus[item.handlingStatus];
+
+        const isCompleted =
+            (orderCode === "D" || orderCode === "T") &&   
+            (handlingCode === "Completed" || handlingCode === "PendingCallback");                
 
         if (isCompleted) {
             navigate(`/car-material/${item.id}`);
@@ -220,9 +230,6 @@ export default function CarMaterial() {
 
     return (
         <div>
-            {/* Breadcrumb */}
-            <Breadcrumb items={["Thẩm định dịch vụ", pageName]} />
-
             {/* Search Box */}
             <SearchBox
                 filters={filters}

@@ -1,6 +1,8 @@
 //Sidebar.jsx
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
+import { FilePenLine, Car } from "lucide-react";
+
 
 export default function Sidebar({ menuOpen, setMenuOpen }) {
   const location = useLocation();
@@ -8,7 +10,7 @@ export default function Sidebar({ menuOpen, setMenuOpen }) {
   const [submenuOpen, setSubmenuOpen] = useState(true);
 
   const menuItems = [
-    { name: "Vật chất xe ô tô", path: "/car-material" },
+    { name: "Vật chất xe ô tô", path: "/car-material", icon: Car },
   ];
 
   return (
@@ -40,31 +42,37 @@ export default function Sidebar({ menuOpen, setMenuOpen }) {
             className="w-full text-left px-2 py-2 rounded hover:bg-gray-200 
                        flex justify-between items-center"
           >
-            <span className="font-semibold">Thẩm định dịch vụ</span>
+            <span className="flex items-center gap-2 font-semibold">
+              <FilePenLine className="w-5 h-5 text-black-500" />
+              Thẩm định dịch vụ
+            </span>
             <span>{submenuOpen ? "▲" : "▼"}</span>
           </button>
 
           {/* --- MENU ITEMS --- */}
           {submenuOpen && (
             <div className="ml-3 mt-1 space-y-1">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => {
-                    if (window.innerWidth < 768) setMenuOpen(false);
-                  }}
-                  // location.pathname === item.path
-                  className={`block w-full px-2 py-1 rounded hover:bg-gray-200
-                    ${location.pathname.startsWith(item.path)
-                      ? "bg-orange-100 text-orange-500 font-semibold"
-                      : ""
-                    }
-                  `}
-                >
-                  {item.name}
-                </Link>
-              ))}
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => {
+                      if (window.innerWidth < 768) setMenuOpen(false);
+                    }}
+                    className={`flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-200
+                        ${location.pathname.startsWith(item.path)
+                        ? "bg-orange-100 text-orange-500 font-semibold"
+                        : ""
+                        }
+                    `}
+                  >
+                    {Icon && <Icon className="w-4 h-4" />}
+                    {item.name}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>

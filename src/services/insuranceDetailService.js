@@ -70,24 +70,49 @@ export const getHistoryData = async (id, iddt) => {
   }
 };
 
-export const createVehicleUW = async (id, orderStatus, handlingStatus, iddt, result, description,) => {
+// export const createVehicleUW = async (id, orderStatus, handlingStatus, iddt, result, description,) => {
+//   const user = JSON.parse(localStorage.getItem("user"));
+//   const url = "https://aut.bshc.com.vn/api/vehicle-uw/create";
+
+//   const payload = {
+//     unit: "000",
+//     id: id,
+//     reviewerCode: user.staffCode,
+//     orderStatus: orderStatus,
+//     handlingStatus: handlingStatus,
+//     uwList: [
+//       {
+//         id_dt: iddt,
+//         result: result,
+//         description: description
+//       }
+//     ]
+//   };
+
+//   try {
+//     const response = await fetch(url, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//         "Accept": "application/json",
+//         Authorization: `Bearer ${user?.token}`
+
+//       },
+//       body: JSON.stringify(payload)
+//     });
+
+//     const data = await response.json();
+//     return data;
+
+//   } catch (error) {
+//     console.error("Error calling API:", error);
+//     throw error;
+//   }
+// };
+
+export const createVehicleUW = async (payload) => {
   const user = JSON.parse(localStorage.getItem("user"));
   const url = "https://aut.bshc.com.vn/api/vehicle-uw/create";
-
-  const payload = {
-    unit: "000",
-    id: id,
-    reviewerCode: user.staffCode,
-    orderStatus: orderStatus,
-    handlingStatus: handlingStatus,
-    uwList: [
-      {
-        id_dt: iddt,
-        result: result,
-        description: description
-      }
-    ]
-  };
 
   try {
     const response = await fetch(url, {
@@ -95,63 +120,69 @@ export const createVehicleUW = async (id, orderStatus, handlingStatus, iddt, res
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        Authorization: `Bearer ${user?.token}`
-
+        Authorization: `Bearer ${user.token}`
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        ...payload,
+        reviewerCode: user.staffCode
+      })
     });
 
-    const data = await response.json();
-    return data;
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `API error: ${response.status}`);
+    }
+
+    return await response.json();
 
   } catch (error) {
-    console.error("Error calling API:", error);
+    console.error("Error calling API createVehicleUW:", error);
     throw error;
   }
 };
 
 
 export const pushToPartner = async (channel, productCode, id, orderStatus, handlingStatus, iddt, result, description) => {
-    try {
-        const user = JSON.parse(localStorage.getItem("user"));
-        const payload = {
-            channel: channel, 
-            unit: user.unitCode,
-            productCode: productCode, 
-            id: id, 
-            reviewerCode: user.staffCode,
-            orderStatus: orderStatus,
-            handlingStatus: handlingStatus,
-            uwList: [
-                {
-                    id_dt: iddt,
-                    result: result,
-                    description: description
-                }
-            ]
-        };
-        
-        const response = await fetch(
-            "https://aut.bshc.com.vn/api/vehicle-uw/push-to-partner",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-                body: JSON.stringify(payload),
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const payload = {
+      channel: channel,
+      unit: user.unitCode,
+      productCode: productCode,
+      id: id,
+      reviewerCode: user.staffCode,
+      orderStatus: orderStatus,
+      handlingStatus: handlingStatus,
+      uwList: [
+        {
+          id_dt: iddt,
+          result: result,
+          description: description
         }
+      ]
+    };
 
-        const data = await response.json();
-        console.log("API response:", data);
-        return data;
-    } catch (error) {
-        console.error("Error calling push-to-partner:", error);
-        return null;
+    const response = await fetch(
+      "https://aut.bshc.com.vn/api/vehicle-uw/push-to-partner",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    const data = await response.json();
+    console.log("API response:", data);
+    return data;
+  } catch (error) {
+    console.error("Error calling push-to-partner:", error);
+    return null;
+  }
 };

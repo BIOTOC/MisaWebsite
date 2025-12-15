@@ -11,8 +11,7 @@ class InsuranceOrder {
     this.insuredValue = data.insuredValue || 0      // STBH
     this.fee = data.fee || 0                        // Phí BH
 
-    // Convert createdAt sang dd/MM/yyyy nếu có giá trị
-    this.createAt = formatDate(data.createAt) || ""
+    this.createdAt = formatDate(data.createdAt) || ""
 
     this.orderStatus = data.orderStatus || ""       // Trạng thái đơn
     this.processor = data.processor || ""           // Người xử lý

@@ -70,9 +70,6 @@ export default function CarInspectionHistoryPage() {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb items={["Thẩm định dịch vụ", "Vật chất xe ô tô", "Chi tiết thẩm định dịch vụ", "Lịch sử thẩm định"]} />
-
       <div className="px-6 pb-6 pt-0">
         {/* TITLE */}
         <h1 className="text-brand-orange text-xl font-bold mb-4">

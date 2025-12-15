@@ -8,9 +8,15 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const passwordInputRef = useRef(null);
+
     const [username, setUsername] = useState("");
     const [ma_dvi, setMaDvi] = useState("");
     const [error, setError] = useState("");
+
+    // ==== NEW INPUT REFS ====
+    const maDviRef = useRef(null);
+    const usernameRef = useRef(null);
+    const passwordRef = useRef(null);
 
     const handleLogin = async () => {
         setError("");
@@ -28,10 +34,8 @@ export default function Login() {
         }
 
         localStorage.setItem("user", JSON.stringify(result));
-
         navigate("/car-material");
     };
-
 
     const toggleShowPassword = () => {
         setShowPassword(!showPassword);
@@ -58,13 +62,18 @@ export default function Login() {
                 )}
 
                 <div className="flex flex-col gap-4">
+
                     {/* Mã đơn vị */}
                     <div>
                         <label className="block text-sm font-medium mb-1">Mã đơn vị</label>
                         <input
+                            ref={maDviRef}
                             type="text"
                             value={ma_dvi}
                             onChange={(e) => setMaDvi(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") usernameRef.current?.focus();
+                            }}
                             placeholder="Nhập mã đơn vị"
                             className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-brand-orange"
                         />
@@ -74,9 +83,13 @@ export default function Login() {
                     <div>
                         <label className="block text-sm font-medium mb-1">Tên đăng nhập</label>
                         <input
+                            ref={usernameRef}
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") passwordRef.current?.focus();
+                            }}
                             placeholder="Nhập tên đăng nhập"
                             className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-brand-orange"
                         />
@@ -87,10 +100,13 @@ export default function Login() {
                         <label className="block text-sm font-medium mb-1">Mật khẩu</label>
                         <div className="relative flex items-center">
                             <input
-                                ref={passwordInputRef}
+                                ref={passwordRef}
                                 type={showPassword ? "text" : "password"}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleLogin();
+                                }}
                                 placeholder="Nhập mật khẩu"
                                 className="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 outline-brand-orange"
                             />
@@ -104,12 +120,6 @@ export default function Login() {
                             </button>
                         </div>
                     </div>
-
-                    {/* Remember checkbox */}
-                    {/* <label className="flex items-center gap-2 text-sm mt-1">
-                        <input type="checkbox" className="accent-brand-orange" />
-                        <span>Ghi nhớ mật khẩu lần sau</span>
-                    </label> */}
 
                     {/* Login button */}
                     <button
@@ -128,7 +138,7 @@ export default function Login() {
                 </div>
             </div>
 
-            {/* RIGHT IMAGE AREA — HIDDEN ON MOBILE */}
+            {/* RIGHT IMAGE AREA */}
             <div className="hidden md:flex w-1/2 relative items-center justify-center">
                 <div className="relative z-10 text-center">
                     <img
