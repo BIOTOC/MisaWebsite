@@ -2,7 +2,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getHistoryData } from "../services/insuranceDetailService";
 import { getSearchBoxData } from "../services/insuranceService";
-import Breadcrumb from "../components/Breadcrumb";
 
 export default function CarInspectionHistoryPage() {
   const navigate = useNavigate();
@@ -77,12 +76,13 @@ export default function CarInspectionHistoryPage() {
         </h1>
 
         {/* TABLE */}
-        <div className="overflow-x-auto overflow-y-auto max-h-[56vh] border border-gray-500">
-          <table className="w-full border-collapse text-sm">
+        <div className="overflow-x-auto overflow-y-auto max-h-[56vh] border shadow-sm text-xs">
+          <table className="w-full border border-gray-300 table-auto text-sm">
 
             {/* HEADER */}
-            <thead className="sticky top-0 z-10">
-              <tr className="bg-gray-200 text-gray-700">
+            <thead className="bg-gray-100 sticky top-0 z-10">
+              <tr className="[&>th]:border [&>th]:px-2 [&>th]:py-2 [&>th]:whitespace-nowrap font-semibold text-center">
+
                 <th className="border border-gray-500 px-2 py-1 whitespace-nowrap min-w-[160px]">
                   Ngày xử lý
                 </th>
@@ -112,7 +112,7 @@ export default function CarInspectionHistoryPage() {
               {detail.map((row, index) => (
                 <tr
                   key={index}
-                  className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"} hover:bg-gray-50`}
+                  className="hover:bg-orange-100"
                 >
                   <td className="border border-gray-500 px-2 py-1">{row.date}</td>
                   <td className="border border-gray-500 px-2 py-1">{row.user}</td>

@@ -1,24 +1,32 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { File } from "lucide-react";
 import { getInsuranceDetail } from "../services/insuranceDetailService";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getSearchBoxData } from "../services/insuranceService";
-import Breadcrumb from "../components/Breadcrumb";
 
 export default function CarMaterialDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const [previewImage, setPreviewImage] = useState(null);
     const [detail, setDetail] = useState(null);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [uwStatus, setUwStatus] = useState([]);
     const [reStatus, setReStatus] = useState([]);
     const [insurStatus, setInsurStatus] = useState([]);
-    const images = selectedVehicle?.appraisalFiles?.images || [];
     const [previewIndex, setPreviewIndex] = useState(null);
+    const [imageCacheKey, setImageCacheKey] = useState(null);
+
+    const images = useMemo(
+        () => selectedVehicle?.appraisalFiles?.images ?? [],
+        [selectedVehicle]
+    );
+
+    const previewImage =
+        previewIndex !== null && images[previewIndex]
+            ? `${images[previewIndex].link}?t=${imageCacheKey}`
+            : null;
 
     useEffect(() => {
         const fetchDropdown = async () => {
@@ -53,6 +61,31 @@ export default function CarMaterialDetail() {
         fetchDetail();
     }, [id]);
 
+    useEffect(() => {
+        if (previewIndex === null) return;
+
+        const handleKeyDown = (e) => {
+            if (e.key === "ArrowRight") {
+                setPreviewIndex((prev) =>
+                    prev < images.length - 1 ? prev + 1 : prev
+                );
+            }
+
+            if (e.key === "ArrowLeft") {
+                setPreviewIndex((prev) =>
+                    prev > 0 ? prev - 1 : prev
+                );
+            }
+
+            if (e.key === "Escape") {
+                setPreviewIndex(null);
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [previewIndex, images.length]);
+
     if (!detail) {
         return (
             <div className="flex flex-col items-center justify-center h-64">
@@ -70,11 +103,11 @@ export default function CarMaterialDetail() {
         );
     }
 
-    const totalPages = Math.max(1, Math.ceil(detail.vehicles?.length / itemsPerPage));
-    const paginated = detail.vehicles?.slice(
+    const totalPages = Math.max(1, Math.ceil(detail.vehicles.length / itemsPerPage));
+    const paginated = detail.vehicles.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
-    ) || [];
+    );
 
     return (
         <div>
@@ -123,7 +156,7 @@ export default function CarMaterialDetail() {
                                 <tr
                                     key={i}
                                     onClick={() => setSelectedVehicle(v)}
-                                    className={`[&>td]:border [&>td]:px-2 [&>td]:py-1 text-left cursor-pointer hover:bg-gray-50
+                                    className={`[&>td]:border [&>td]:px-2 [&>td]:py-1 text-left cursor-pointer hover:bg-orange-100
                                         ${selectedVehicle?.iddt === v.iddt ? "bg-orange-100" : ""}
                                     `}
                                 >
@@ -158,7 +191,7 @@ export default function CarMaterialDetail() {
                                 <button
                                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                     disabled={currentPage === 1}
-                                    className={`px-3 py-1 border rounded ${currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-white hover:bg-gray-100"}`}
+                                    className={`hidden md:flex items-center justify-center w-8 h-8 border rounded ${currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-white hover:bg-gray-100"}`}
                                 >
                                     <ChevronLeft size={14} />
                                 </button>
@@ -167,7 +200,7 @@ export default function CarMaterialDetail() {
                                     <button
                                         key={i}
                                         onClick={() => setCurrentPage(i + 1)}
-                                        className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-brand-orange hover:bg-brand-orange-hover text-white" : "bg-white"}`}
+                                        className={`w-8 h-8 border rounded ${currentPage === i + 1 ? "bg-brand-orange hover:bg-brand-orange-hover text-white" : "bg-white"}`}
                                     >
                                         {i + 1}
                                     </button>
@@ -176,7 +209,7 @@ export default function CarMaterialDetail() {
                                 <button
                                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                     disabled={currentPage === totalPages}
-                                    className={`px-3 py-1 border rounded ${currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-white hover:bg-gray-100"}`}
+                                    className={`hidden md:flex items-center justify-center w-8 h-8 border rounded ${currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-white hover:bg-gray-100"}`}
                                 >
                                     <ChevronRight size={14} />
                                 </button>
@@ -254,7 +287,7 @@ export default function CarMaterialDetail() {
                                             className="border rounded overflow-hidden cursor-pointer"
                                             onClick={() => {
                                                 setPreviewIndex(idx);
-                                                setPreviewImage(`${img.link}?t=${new Date().getTime()}`);
+                                                setImageCacheKey(Date.now());
                                             }}
                                         >
                                             <img
@@ -299,7 +332,7 @@ export default function CarMaterialDetail() {
                                 state={{
                                     from: "detail",
                                     id,
-                                    iddt : selectedVehicle.iddt
+                                    iddt: selectedVehicle.iddt
                                 }}
                                 className="text-blue-600 underline">
                                 Lịch sử thẩm định
@@ -321,14 +354,15 @@ export default function CarMaterialDetail() {
                 {previewImage && (
                     <div
                         className="fixed inset-0 bg-black/70 flex flex-col items-center justify-center 
-                            z-50 p-4 top-[60px] left-0 lg:left-[240px]"
-                        onClick={() => setPreviewImage(null)}
+                            z-50 p-4 top-[60px] left-0 md:left-[240px]"
+                        onClick={() => {
+                            setPreviewIndex(null);
+                        }}
                     >
                         {/* Nút đóng */}
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                setPreviewImage(null);
                                 setPreviewIndex(null);
                             }}
                             className="absolute top-4 right-4 bg-black/60 text-white w-10 h-10 
@@ -341,7 +375,7 @@ export default function CarMaterialDetail() {
                         {/* Ảnh lớn */}
                         <img
                             src={previewImage}
-                            className="max-w-[90vw] max-h-[65vh] object-contain rounded-x0 shadow-lg mb-4"
+                            className="max-w-full max-h-[50vh] md:max-h-[65vh] object-contain rounded shadow-lg mb-4"
                             onClick={(e) => e.stopPropagation()}
                         />
 
@@ -351,16 +385,13 @@ export default function CarMaterialDetail() {
                                 overflow-x-auto whitespace-nowrap scrollbar-thin"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            {images.slice(0, 5).map((img, idx) => (
+                            {images.map((img, idx) => (
                                 <img
                                     key={idx}
                                     src={img.link}
                                     className={`w-16 h-16 object-cover cursor-pointer rounded border 
                                         ${idx === previewIndex ? "border-orange-400" : "border-transparent"}`}
-                                    onClick={() => {
-                                        setPreviewIndex(idx);
-                                        setPreviewImage(`${img.link}?t=${new Date().getTime()}`);
-                                    }}
+                                    onClick={() => setPreviewIndex(idx)}
                                 />
                             ))}
                         </div>

@@ -12,6 +12,7 @@ export default function Login() {
     const [username, setUsername] = useState("");
     const [ma_dvi, setMaDvi] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     // ==== NEW INPUT REFS ====
     const maDviRef = useRef(null);
@@ -19,6 +20,8 @@ export default function Login() {
     const passwordRef = useRef(null);
 
     const handleLogin = async () => {
+        if (loading) return;
+
         setError("");
 
         if (!ma_dvi || !username || !password) {
@@ -26,15 +29,21 @@ export default function Login() {
             return;
         }
 
-        const result = await login(username, password, ma_dvi);
+        try {
+            setLoading(true);
 
-        if (!result) {
-            setError("Tên đăng nhập hoặc mật khẩu không đúng.");
-            return;
+            const result = await login(username, password, ma_dvi);
+
+            if (!result) {
+                setError("Tên đăng nhập hoặc mật khẩu không đúng.");
+                return;
+            }
+
+            localStorage.setItem("user", JSON.stringify(result));
+            navigate("/car-material");
+        } finally {
+            setLoading(false);
         }
-
-        localStorage.setItem("user", JSON.stringify(result));
-        navigate("/car-material");
     };
 
     const toggleShowPassword = () => {
@@ -46,7 +55,7 @@ export default function Login() {
         <div className="w-full h-screen flex flex-col md:flex-row bg-white">
 
             {/* LEFT FORM */}
-            <div className="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-32 py-10">
+            <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 md:px-32 py-10">
                 <h1 className="text-3xl font-semibold text-center mb-2">Đăng nhập</h1>
                 <p className="text-center text-gray-500 mb-5">
                     Hệ thống quản lý tập trung của hệ sinh thái BSH
@@ -123,12 +132,15 @@ export default function Login() {
 
                     {/* Login button */}
                     <button
-                        className="bg-brand-orange hover:bg-brand-orange-hover text-white font-medium py-2 rounded-lg mt-5"
+                        disabled={loading}
                         onClick={handleLogin}
+                        className={`
+                            bg-brand-orange text-white font-medium py-2 rounded-lg mt-5
+                            ${loading ? "opacity-60 cursor-not-allowed" : "hover:bg-brand-orange-hover"}
+                        `}
                     >
-                        Đăng nhập
+                        {loading ? "Đang đăng nhập..." : "Đăng nhập"}
                     </button>
-
                 </div>
 
                 <div className="text-center text-gray-400 text-xs mt-10">
@@ -139,7 +151,7 @@ export default function Login() {
             </div>
 
             {/* RIGHT IMAGE AREA */}
-            <div className="hidden md:flex w-1/2 relative items-center justify-center">
+            <div className="hidden lg:flex w-1/2 relative items-center justify-center">
                 <div className="relative z-10 text-center">
                     <img
                         src="/login-side-image.png"

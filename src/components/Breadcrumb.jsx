@@ -1,17 +1,28 @@
 export default function Breadcrumb({ items }) {
-    return (
-        <div className="text-base font-semibold flex items-center gap-2">
-            {items.map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
-                    <span className={index === items.length - 1 ? "text-brand-orange" : ""}>
-                        {item}
-                    </span>
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-base font-semibold">
+      {items.map((item, index) => {
+        const isLast = index === items.length - 1;
 
-                    {index < items.length - 1 && (
-                        <span className="text-gray-400">›</span>
-                    )}
-                </div>
-            ))}
-        </div>
-    );
+        return (
+          <div
+            key={index}
+            className={`flex items-center gap-2 ${
+              isLast ? "whitespace-normal" : "whitespace-nowrap"
+            }`}
+          >
+            <span
+              className={isLast ? "text-brand-orange" : ""}
+            >
+              {item}
+            </span>
+
+            {!isLast && (
+              <span className="text-gray-400 whitespace-nowrap">›</span>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }

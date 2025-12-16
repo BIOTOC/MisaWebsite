@@ -1,5 +1,4 @@
 import SearchBox from "../components/Searchbox";
-import Breadcrumb from "../components/Breadcrumb";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react"
 import { getInsuranceOrders } from "../services/insuranceService"
@@ -50,7 +49,8 @@ export default function CarMaterial() {
     });
 
     const [data, setData] = useState([])
-    const [loading, setLoading] = useState(true);
+    const [pageLoading, setPageLoading] = useState(true);
+    const [tableLoading, setTableLoading] = useState(false);
     const [dropdownData, setDropdownData] = useState({
         uwStatus: [],
         reStatus: [],
@@ -64,13 +64,16 @@ export default function CarMaterial() {
     /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(() => {
         async function loadData() {
-            setLoading(true);
+            setPageLoading(true);
 
             try {
-                const orders = await getInsuranceOrders(filters);
-                setData(orders);
 
-                const dropdown = await getSearchBoxData();
+                const [orders, dropdown] = await Promise.all([
+                    getInsuranceOrders(filters),
+                    getSearchBoxData()
+                ]);
+
+                setData(orders);
 
                 if (dropdown?.Status === "OK") {
                     setDropdownData({
@@ -82,7 +85,7 @@ export default function CarMaterial() {
             } catch (e) {
                 console.error(e);
             } finally {
-                setLoading(false);
+                setPageLoading(false);
             }
         }
 
@@ -93,7 +96,7 @@ export default function CarMaterial() {
     const handleSearch = async () => {
         const updatedFilters = { ...filters, ...searchInputs };
         setFilters(updatedFilters);
-        setLoading(true);
+        setTableLoading(true);
 
         try {
             const orders = await getInsuranceOrders(updatedFilters);
@@ -102,7 +105,7 @@ export default function CarMaterial() {
         } catch (err) {
             console.error(err);
         } finally {
-            setLoading(false);
+            setTableLoading(false);
         }
     };
 
@@ -123,8 +126,8 @@ export default function CarMaterial() {
         const handlingCode = statusMaps.handlingStatus[item.handlingStatus];
 
         const isCompleted =
-            (orderCode === "D" || orderCode === "T") &&   
-            (handlingCode === "Completed" || handlingCode === "PendingCallback");                
+            (orderCode === "D" || orderCode === "T") &&
+            (handlingCode === "Completed" || handlingCode === "PendingCallback");
 
         if (isCompleted) {
             navigate(`/car-material/${item.id}`);
@@ -149,8 +152,6 @@ export default function CarMaterial() {
         currentPage * itemsPerPage
     );
 
-    //--------------------------------------------------------
-    // Giới hạn hiển thị số nút, ví dụ 5 nút quanh trang hiện tại
     const getPageNumbers = () => {
         const maxButtons = 5;
         const pages = [];
@@ -169,7 +170,6 @@ export default function CarMaterial() {
 
         return pages;
     };
-    //--------------------------------------------------------
 
     const exportPDF = () => {
         const doc = new jsPDF({
@@ -228,6 +228,24 @@ export default function CarMaterial() {
         doc.save("vat-chat-xe.pdf");
     };
 
+        if (pageLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64">
+                <div className="flex space-x-2">
+                    {[...Array(3)].map((_, i) => (
+                        <div
+                            key={i}
+                            className="w-4 h-4 bg-orange-400 rounded-full animate-pulse"
+                            style={{ animationDelay: `${i * 0.2}s` }}
+                        ></div>
+                    ))}
+                </div>
+                <p className="mt-2 text-xl text-brand-orange">Đang tải dữ liệu</p>
+            </div>
+        );
+    }
+
+
     return (
         <div>
             {/* Search Box */}
@@ -254,14 +272,14 @@ export default function CarMaterial() {
                     setCurrentPage(1);
 
                     // Lấy lại dữ liệu toàn bộ
-                    setLoading(true);
+                    setTableLoading(true);
                     try {
                         const orders = await getInsuranceOrders(resetFilters);
                         setData(orders);
                     } catch (err) {
                         console.error(err);
                     } finally {
-                        setLoading(false);
+                        setTableLoading(false);
                     }
                 }}
             />
@@ -288,14 +306,14 @@ export default function CarMaterial() {
                     </thead>
 
                     <tbody>
-                        {loading ? (
+                        {tableLoading ? (
                             <TableSkeleton />
                         ) : (
                             paginatedData.map((row, i) => (
                                 <tr
                                     key={i}
                                     onClick={() => handleRowClick(row)}
-                                    className="[&>td]:border [&>td]:px-2 [&>td]:py-1 hover:bg-gray-50 text-left">
+                                    className="[&>td]:border [&>td]:px-2 [&>td]:py-1 hover:bg-orange-100 text-left">
                                     <td>{row.id}</td>
                                     <td>{row.customer}</td>
                                     <td>{row.license}</td>
@@ -330,7 +348,7 @@ export default function CarMaterial() {
                             <button
                                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                 disabled={currentPage === 1}
-                                className={`px-3 py-1 border rounded ${currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-white hover:bg-gray-100"}`}
+                                className={`hidden md:flex items-center justify-center w-8 h-8 border rounded ${currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-white hover:bg-gray-100"}`}
                             >
                                 <ChevronLeft size={14} />
                             </button>
@@ -339,7 +357,7 @@ export default function CarMaterial() {
                                 <button
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
-                                    className={`px-3 py-1 border rounded ${currentPage === page ? "bg-brand-orange hover:bg-brand-orange-hover text-white" : "bg-white"}`}
+                                    className={`w-8 h-8 border rounded ${currentPage === page ? "bg-brand-orange hover:bg-brand-orange-hover text-white" : "bg-white"}`}
                                 >
                                     {page}
                                 </button>
@@ -348,7 +366,7 @@ export default function CarMaterial() {
                             <button
                                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                 disabled={currentPage === totalPages}
-                                className={`px-3 py-1 border rounded ${currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-white hover:bg-gray-100"}`}
+                                className={`hidden md:flex items-center justify-center w-8 h-8 border rounded ${currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-white hover:bg-gray-100"}`}
                             >
                                 <ChevronRight size={14} />
                             </button>

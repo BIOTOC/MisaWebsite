@@ -1,7 +1,7 @@
 //Sidebar.jsx
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { FilePenLine, Car } from "lucide-react";
+import { FilePenLine, Car, ChevronDown, ChevronUp } from "lucide-react";
 
 
 export default function Sidebar({ menuOpen, setMenuOpen }) {
@@ -28,7 +28,9 @@ export default function Sidebar({ menuOpen, setMenuOpen }) {
         className={`
           fixed top-[60px] left-0 
           h-[calc(100vh-55px)] 
-          bg-white shadow-lg p-3 text-base 
+          bg-gray-50
+          border-r border-gray-300
+          shadow-md p-3 text-base 
           w-56 z-[999] transition-transform duration-300
           rounded-r-2xl overflow-hidden
           md:translate-x-0     
@@ -39,14 +41,19 @@ export default function Sidebar({ menuOpen, setMenuOpen }) {
           {/* --- SUBMENU HEADER --- */}
           <button
             onClick={() => setSubmenuOpen(!submenuOpen)}
-            className="w-full text-left px-2 py-2 rounded hover:bg-gray-200 
+            className="w-full text-left px-2 py-2 rounded
+                       hover:bg-gray-200 
                        flex justify-between items-center"
           >
             <span className="flex items-center gap-2 font-semibold">
-              <FilePenLine className="w-5 h-5 text-black-500" />
+              <FilePenLine className="w-4 h-4 text-black-500" />
               Thẩm định dịch vụ
             </span>
-            <span>{submenuOpen ? "▲" : "▼"}</span>
+            <span>{submenuOpen
+              ? <ChevronUp size={16} />
+              : <ChevronDown size={16} />
+            }
+            </span>
           </button>
 
           {/* --- MENU ITEMS --- */}
@@ -65,7 +72,7 @@ export default function Sidebar({ menuOpen, setMenuOpen }) {
                         ${location.pathname.startsWith(item.path)
                         ? "bg-orange-100 text-orange-500 font-semibold"
                         : ""
-                        }
+                      }
                     `}
                   >
                     {Icon && <Icon className="w-4 h-4" />}
